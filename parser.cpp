@@ -4,10 +4,10 @@ parser::parser() {
     inVariablesArea = false;
 }
 
-void parser::parse(std::string input_filename, std::string output_filename) {
+void parser::parse(string input_filename, string output_filename) {
     const std::size_t w = 2;
-    std::ofstream temp("binaryStrings.txt");
-    std::vector<std::uint16_t> data;
+    ofstream temp("binaryStrings.txt");
+    vector<std::uint16_t> data;
     input_file.open(input_filename);
 
     firstPass();
@@ -23,14 +23,14 @@ void parser::parse(std::string input_filename, std::string output_filename) {
     input_file.close();
 }
 /*-----------------------------------------------------------------------------------------*/
-bool parser::isValidVariable(std::string variabale, std::string& error) {
+bool parser::isValidVariable(string variabale, string& error) {
     if (variables_table.find(variabale) != variables_table.end()) {
-        error = "variable *" + variabale + "* is already defined at line " + std::to_string(variables_table.find(variabale)->second);
+        error = "variable *" + variabale + "* is already defined at line " + to_string(variables_table.find(variabale)->second);
         return false;
     }
 
     if (labels_table.find(variabale) != labels_table.end()) {
-        error = "variable *" + variabale + "* is already used as a label at line " + std::to_string(labels_table.find(variabale)->second);
+        error = "variable *" + variabale + "* is already used as a label at line " + to_string(labels_table.find(variabale)->second);
         return false;
     }
 
@@ -62,7 +62,7 @@ bool parser::isValidVariable(std::string variabale, std::string& error) {
 }
 /*-----------------------------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------------------------*/
-bool parser::isKeyWord(std::string variabale) {
+bool parser::isKeyWord(string variabale) {
     variabale = toLower(variabale);
     if (instrucitons_two_operand.find(variabale) != instrucitons_two_operand.end() ||
         instrucitons_one_operand.find(variabale) != instrucitons_one_operand.end() ||
@@ -76,21 +76,21 @@ bool parser::isKeyWord(std::string variabale) {
     return false;
 }
 
-bool parser::isVariable(std::string operand) {
+bool parser::isVariable(string operand) {
     if (variables_table.find(operand) != variables_table.end())
         return true;
 
     return false;
 }
 
-bool parser::isLabel(std::string operand) {
+bool parser::isLabel(string operand) {
     if (labels_table.find(operand) != labels_table.end())
         return true;
 
     return false;
 }
 
-bool parser::isIndex(std::string str, std::int16_t& index) {
+bool parser::isIndex(string str, int16_t& index) {
     int tmp = 632767;
     string2int(str, tmp);
 
@@ -101,7 +101,7 @@ bool parser::isIndex(std::string str, std::int16_t& index) {
     return true;
 }
 
-int parser::isRegister(std::string operand) {
+int parser::isRegister(string operand) {
     if(operand.size() != 2)
         return -1;
 
@@ -117,7 +117,7 @@ int parser::isRegister(std::string operand) {
 }
 /*-----------------------------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------------------------*/
-bool parser::isTwoOpsInstruction(std::string instruction) {
+bool parser::isTwoOpsInstruction(string instruction) {
     instruction = toLower(instruction);
     if (instrucitons_two_operand.find(instruction) != instrucitons_two_operand.end())
         return true;
@@ -125,7 +125,7 @@ bool parser::isTwoOpsInstruction(std::string instruction) {
     return false;
 }
 
-bool parser::isOneOpInstruction(std::string instruction) {
+bool parser::isOneOpInstruction(string instruction) {
     instruction = toLower(instruction);
     if (instrucitons_one_operand.find(instruction) != instrucitons_one_operand.end())
         return true;
@@ -133,7 +133,7 @@ bool parser::isOneOpInstruction(std::string instruction) {
     return false;
 }
 
-bool parser::isBranchInstruction(std::string instruction) {
+bool parser::isBranchInstruction(string instruction) {
     instruction = toLower(instruction);
     if (instrucitons_branch.find(instruction) != instrucitons_branch.end())
         return true;
@@ -141,7 +141,7 @@ bool parser::isBranchInstruction(std::string instruction) {
     return false;
 }
 
-bool parser::isNoOpInstruction(std::string instruction) {
+bool parser::isNoOpInstruction(string instruction) {
     instruction = toLower(instruction);
     if (instrucitons_no_operand.find(instruction) != instrucitons_no_operand.end())
         return true;
@@ -149,7 +149,7 @@ bool parser::isNoOpInstruction(std::string instruction) {
     return false;
 }
 
-bool parser::isSubRoutineInstruction(std::string instruction) {
+bool parser::isSubRoutineInstruction(string instruction) {
     instruction = toLower(instruction);
     if (instructions_sub_routine.find(instruction) != instructions_sub_routine.end())
         return true;
@@ -158,7 +158,7 @@ bool parser::isSubRoutineInstruction(std::string instruction) {
 }
 /*-----------------------------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------------------------*/
-std::string parser::regCode(int reg) {
+string parser::regCode(int reg) {
     if (reg == 0)
         return "000";
     if (reg == 1)
@@ -177,12 +177,12 @@ std::string parser::regCode(int reg) {
     return "111";
 }
 
-bool parser::line2fields(const std::string& s, std::vector<std::string>& tokens, char delimiter, int& two_lines_label) {
+bool parser::line2fields(const string& s, vector<string>& tokens, char delimiter, int& two_lines_label) {
     int num_fields = 0;
-    std::string token;
+    string token;
     std::istringstream tokenStream(s);
 
-    while (std::getline(tokenStream, token, delimiter)) {
+    while (getline(tokenStream, token, delimiter)) {
         if (num_fields > 5)
             return false;
 
@@ -196,7 +196,7 @@ bool parser::line2fields(const std::string& s, std::vector<std::string>& tokens,
         }
 
         if (num_fields == 2 && toLower(tokens[0]) == "define") {
-            std::getline(tokenStream, token);
+            getline(tokenStream, token);
             stringErase(token, ' ');
             if(token.find(';') != -1) {
                 token = token.substr(0, token.find(';'));
@@ -210,7 +210,7 @@ bool parser::line2fields(const std::string& s, std::vector<std::string>& tokens,
         if(two_lines_label)
             return false;
 
-        std::string label = tokens[0];
+        string label = tokens[0];
         label = label.substr(0, label.size() - 1);
         tmp_label = label;
         two_lines_label = 1;
@@ -219,7 +219,7 @@ bool parser::line2fields(const std::string& s, std::vector<std::string>& tokens,
     return true;
 }
 
-bool parser::readLine(std::string line, int& line_number, std::string& error, int& two_lines_label) {
+bool parser::readLine(string line, int& line_number, string& error, int& two_lines_label) {
     // skip empty lines
     if (line.size() == 0) {
         --line_number;
@@ -233,7 +233,7 @@ bool parser::readLine(std::string line, int& line_number, std::string& error, in
     }
 
     stringReplaceAll(line, '\t', ' ');
-    std::vector<std::string> splited_line;
+    vector<string> splited_line;
 
     if (line2fields(line, splited_line, ' ', two_lines_label)) {
         if (two_lines_label == 1) {
@@ -248,7 +248,7 @@ bool parser::readLine(std::string line, int& line_number, std::string& error, in
         if (toLower(splited_line[0]) == "define") {
             inVariablesArea = true;
             if (splited_line.size() != 3) {
-                error = "invalid number of arguments expected 2 arguments after keyword DEFINE, found " + std::to_string(splited_line.size()) + " instead";
+                error = "invalid number of arguments expected 2 arguments after keyword DEFINE, found " + to_string(splited_line.size()) + " instead";
                 return false;
             }
 
@@ -258,7 +258,7 @@ bool parser::readLine(std::string line, int& line_number, std::string& error, in
                 return false;
         }
         else if (inVariablesArea) {
-            error = "expected DEFINE at line " + std::to_string(line_number) + " found *" + splited_line[0] + "* instead";
+            error = "expected DEFINE at line " + to_string(line_number) + " found *" + splited_line[0] + "* instead";
             return false;
         }
         else if (isKeyWord(splited_line[0]) && splited_line.size() >= 1 && splited_line.size() <= 4) {
@@ -270,7 +270,7 @@ bool parser::readLine(std::string line, int& line_number, std::string& error, in
                 return false;
             }
 
-            std::string label = splited_line[0];
+            string label = splited_line[0];
             if (label[label.size() - 1] == ':')
                 label = label.substr(0, label.size() - 1);
 
@@ -288,7 +288,7 @@ bool parser::readLine(std::string line, int& line_number, std::string& error, in
     return true;
 }
 
-bool parser::parseLine(std::string line, int& line_number, std::string& error, int& two_lines_label) {
+bool parser::parseLine(string line, int& line_number, string& error, int& two_lines_label) {
     // skip empty lines
     if (line.size() == 0) {
         --line_number;
@@ -302,7 +302,7 @@ bool parser::parseLine(std::string line, int& line_number, std::string& error, i
     }
 
     stringReplaceAll(line, '\t', ' ');
-    std::vector<std::string> splited_line;
+    vector<string> splited_line;
 
     if (line2fields(line, splited_line, ' ', two_lines_label)) {
         if (two_lines_label == 1) {
@@ -321,7 +321,7 @@ bool parser::parseLine(std::string line, int& line_number, std::string& error, i
             return parseKeyWords(splited_line, line_number, error);
         }
         else {
-            std::string label = splited_line[0];
+            string label = splited_line[0];
             if (label[label.size() - 1] == ':')
                 label = label.substr(0, label.size() - 1);
 
@@ -331,7 +331,7 @@ bool parser::parseLine(std::string line, int& line_number, std::string& error, i
                 return parseKeyWords(splited_line, line_number, error);
             }
             else {
-                error = "invalid instruction '" + splited_line[0] + "' at line " + std::to_string(line_number);
+                error = "invalid instruction '" + splited_line[0] + "' at line " + to_string(line_number);
                 return false;
             }
         }
@@ -345,13 +345,13 @@ bool parser::parseLine(std::string line, int& line_number, std::string& error, i
 }
 /*-----------------------------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------------------------*/
-bool parser::parseOperandAuto(std::string operand, std::string& mode, std::string& reg_code, int line_number, std::string& error, bool indirect) {
-    std::string reg;
+bool parser::parseOperandAuto(string operand, string& mode, string& reg_code, int line_number, string& error, bool indirect) {
+    string reg;
 
     if (std::count(operand.begin(), operand.end(), '(') != 1 ||
         std::count(operand.begin(), operand.end(), ')') != 1 ||
         operand.find('(') > operand.find(')')) {
-        error = operand + " is not a valid operand at line " + std::to_string(line_number);
+        error = operand + " is not a valid operand at line " + to_string(line_number);
         return false;
     }
 
@@ -362,7 +362,7 @@ bool parser::parseOperandAuto(std::string operand, std::string& mode, std::strin
         if (isRegister(reg) != -1)
             reg_code = regCode(isRegister(reg));
         else {
-            error = "expected a register name after ( at line " + std::to_string(line_number) + " found *" + reg + "* instead";
+            error = "expected a register name after ( at line " + to_string(line_number) + " found *" + reg + "* instead";
             return false;
         }
     }
@@ -374,7 +374,7 @@ bool parser::parseOperandAuto(std::string operand, std::string& mode, std::strin
         if (isRegister(reg) != -1)
             reg_code = regCode(isRegister(reg));
         else {
-            error = "expected a register name after ( at line " + std::to_string(line_number) + " found *" + reg + "* instead";
+            error = "expected a register name after ( at line " + to_string(line_number) + " found *" + reg + "* instead";
             return false;
         }
     }
@@ -382,13 +382,13 @@ bool parser::parseOperandAuto(std::string operand, std::string& mode, std::strin
     return true;
 }
 
-bool parser::parseOperandIndexed(std::string operand, std::string& mode, std::string& reg_code, std::int16_t& index, std::string& variable, int line_number, std::string& error, bool indirect) {
+bool parser::parseOperandIndexed(string operand, string& mode, string& reg_code, int16_t& index, string& variable, int line_number, string& error, bool indirect) {
     index = 0;
     variable = "";
-    std::vector<std::string> data;
+    vector<string> data;
 
     if (operand[operand.size() - 1] != ')') {
-        error = "expected ) at the end of operand at line " + std::to_string(line_number) + "found *" + operand[operand.size()-  1] + "* instead";
+        error = "expected ) at the end of operand at line " + to_string(line_number) + "found *" + operand[operand.size()-  1] + "* instead";
         return false;
     }
 
@@ -396,7 +396,7 @@ bool parser::parseOperandIndexed(std::string operand, std::string& mode, std::st
     split(operand, data, '(');
 
     if (data.size() != 2) {
-        error = "invalid indexing mode in operand '" + operand + "', index not found. At line " + std::to_string(line_number);
+        error = "invalid indexing mode in operand '" + operand + "', index not found. At line " + to_string(line_number);
         return false;
     }
 
@@ -407,23 +407,23 @@ bool parser::parseOperandIndexed(std::string operand, std::string& mode, std::st
         variable = data[0];
     }
     else {
-        error = "invalid index *" + data[0] + "* provided in operand '" + operand + "'. At line " + std::to_string(line_number);
+        error = "invalid index *" + data[0] + "* provided in operand '" + operand + "'. At line " + to_string(line_number);
         return false;
     }
 
     if (isRegister(data[1]) != -1)
         reg_code = regCode(isRegister(data[1]));
     else {
-        error = "expected a register name after ( at line " + std::to_string(line_number) + " found *" + data[1] + "* instead";
+        error = "expected a register name after ( at line " + to_string(line_number) + " found *" + data[1] + "* instead";
         return false;
     }
 
     return true;
 }
 
-bool parser::parseOperand(std::string operand, std::string& code, std::int16_t& index, std::string& variable, int line_number, std::string& error, bool source, bool indirect) {
-    std::string mode = "";
-    std::string reg_code = "";
+bool parser::parseOperand(string operand, string& code, int16_t& index, string& variable, int line_number, string& error, bool source, bool indirect) {
+    string mode = "";
+    string reg_code = "";
     variable = "";
     index = 0;
 
@@ -455,17 +455,17 @@ bool parser::parseOperand(std::string operand, std::string& code, std::int16_t& 
     return true;
 }
 
-bool parser::parseTwoOpsInstruction(std::vector<std::string> instruction, int& line_number, std::string& error) {
-    std::int16_t index_1;
-    std::int16_t index_2;
-    std::string code_1;
-    std::string code_2;
-    std::string variable_1;
-    std::string variable_2;
+bool parser::parseTwoOpsInstruction(vector<string> instruction, int& line_number, string& error) {
+    int16_t index_1;
+    int16_t index_2;
+    string code_1;
+    string code_2;
+    string variable_1;
+    string variable_2;
     bool indirect_1 = false;
     bool indirect_2 = false;
-    std::string operands = "";
-    std::vector<std::string> operands_vec;
+    string operands = "";
+    vector<string> operands_vec;
 
     for (unsigned int i = 1; i < instruction.size(); i++)
         operands += instruction[i];
@@ -473,7 +473,7 @@ bool parser::parseTwoOpsInstruction(std::vector<std::string> instruction, int& l
     split(operands, operands_vec, ',');
 
     if (operands_vec.size() != 2) {
-        error = "invalid number of operands for instruction '" + instruction[0] + "' at line " + std::to_string(line_number);
+        error = "invalid number of operands for instruction '" + instruction[0] + "' at line " + to_string(line_number);
         return false;
     }
 
@@ -493,14 +493,14 @@ bool parser::parseTwoOpsInstruction(std::vector<std::string> instruction, int& l
 
     if (code_1 == "100111") {
         line_number++;
-        output.push_back(std::bitset< 16 >(index_1).to_string());
+        output.push_back(bitset< 16 >(index_1).to_string());
     }
 
     if (code_1.substr(1,2) == "11") {
         if (variable_1 != "")
             fix_variables_table.insert({variable_1, line_number});
 
-        output.push_back(std::bitset< 16 >(index_1).to_string());
+        output.push_back(bitset< 16 >(index_1).to_string());
         line_number++;
     }
 
@@ -508,17 +508,17 @@ bool parser::parseTwoOpsInstruction(std::vector<std::string> instruction, int& l
         if (variable_2 != "")
             fix_variables_table.insert({variable_2, line_number});
 
-        output.push_back(std::bitset< 16 >(index_2).to_string());
+        output.push_back(bitset< 16 >(index_2).to_string());
         line_number++;
     }
 
     return true;
 }
 
-bool parser::parseOneOpInstruction(std::vector<std::string> instruction, int& line_number, std::string& error) {
-    std::int16_t index;
-    std::string code;
-    std::string variable;
+bool parser::parseOneOpInstruction(vector<string> instruction, int& line_number, string& error) {
+    int16_t index;
+    string code;
+    string variable;
 
     if (instruction.size() == 2) {
         bool indirect = ((instruction[1])[0] == '@') ? true : false;
@@ -526,11 +526,11 @@ bool parser::parseOneOpInstruction(std::vector<std::string> instruction, int& li
             return false;
     }
     else if (instruction.size() == 1) {
-        error = "expected operand after " + instruction[0] + "at line " + std::to_string(line_number) + " found new line instead";
+        error = "expected operand after " + instruction[0] + "at line " + to_string(line_number) + " found new line instead";
         return false;
     }
     else if (instruction.size() > 2) {
-        error = "expected new line after " + instruction[1] + "at line " + std::to_string(line_number) + " found *" + instruction[2] + "* instead";
+        error = "expected new line after " + instruction[1] + "at line " + to_string(line_number) + " found *" + instruction[2] + "* instead";
         return false;
     }
 
@@ -540,17 +540,17 @@ bool parser::parseOneOpInstruction(std::vector<std::string> instruction, int& li
         if (variable != "")
             fix_variables_table.insert({variable, line_number});
 
-        output.push_back(std::bitset< 16 >(index).to_string());
+        output.push_back(bitset< 16 >(index).to_string());
         line_number++;
     }
 
     return true;
 }
 
-bool parser::parseBranchInstruction(std::vector<std::string> instruction, int line_number, std::string& error) {
+bool parser::parseBranchInstruction(vector<string> instruction, int line_number, string& error) {
     char is_reg = '0';
-    std::pair<int, bool> p;
-    std::string code;
+    pair<int, bool> p;
+    string code;
 
     if (instruction.size() == 2) {
         if (isLabel(instruction[1])) {
@@ -564,16 +564,16 @@ bool parser::parseBranchInstruction(std::vector<std::string> instruction, int li
             code = "00000" + regCode(isRegister(instruction[1]));
         }
         else {
-            error = "expected label name after " + instruction[0] + "at line " + std::to_string(line_number) + " found *" + instruction[1] + "*instead";
+            error = "expected label name after " + instruction[0] + "at line " + to_string(line_number) + " found *" + instruction[1] + "*instead";
             return false;
         }
     }
     else if (instruction.size() == 1) {
-        error = "expected label name after " + instruction[0] + "at line " + std::to_string(line_number) + " found new line instead";
+        error = "expected label name after " + instruction[0] + "at line " + to_string(line_number) + " found new line instead";
         return false;
     }
     else {
-        error = "expected new line after " + instruction[1] + "at line " + std::to_string(line_number) + " found *" + instruction[2] + "* instead";
+        error = "expected new line after " + instruction[1] + "at line " + to_string(line_number) + " found *" + instruction[2] + "* instead";
         return false;
     }
 
@@ -581,9 +581,9 @@ bool parser::parseBranchInstruction(std::vector<std::string> instruction, int li
     return true;
 }
 
-bool parser::parseNoOpInstruction(std::vector<std::string> instruction, int line_number, std::string& error) {
+bool parser::parseNoOpInstruction(vector<string> instruction, int line_number, string& error) {
     if (instruction.size() != 1) {
-        error = "expected new line after " + instruction[0] + " at line " + std::to_string(line_number) + " found *" + instruction[1] + "*instead";
+        error = "expected new line after " + instruction[0] + " at line " + to_string(line_number) + " found *" + instruction[1] + "*instead";
         return false;
     }
 
@@ -591,11 +591,11 @@ bool parser::parseNoOpInstruction(std::vector<std::string> instruction, int line
     return true;
 }
 
-bool parser::parseSubRoutineInstruction(std::vector<std::string> instruction, int line_number, std::string& error) {
+bool parser::parseSubRoutineInstruction(vector<string> instruction, int line_number, string& error) {
     char is_reg = '0';
-    std::string code;
-    std::pair<int, bool> p;
-    std::string key_word = toLower(instruction[0]);
+    string code;
+    pair<int, bool> p;
+    string key_word = toLower(instruction[0]);
 
     if (key_word == "jsr") {
         if (instruction.size() == 2 && isLabel(instruction[1])) {
@@ -609,11 +609,11 @@ bool parser::parseSubRoutineInstruction(std::vector<std::string> instruction, in
             code = "00000000" + regCode(isRegister(instruction[1]));
         }
         else if (instruction.size() == 1) {
-            error = "expected label name after jsr instruction at line " + std::to_string(line_number) + " found new line instead";
+            error = "expected label name after jsr instruction at line " + to_string(line_number) + " found new line instead";
             return false;
         }
         else {
-            error = "expected label name after jsr instruction at line " + std::to_string(line_number) + " found *" + instruction[1] + "* instead";
+            error = "expected label name after jsr instruction at line " + to_string(line_number) + " found *" + instruction[1] + "* instead";
             return false;
         }
     }
@@ -622,7 +622,7 @@ bool parser::parseSubRoutineInstruction(std::vector<std::string> instruction, in
         return true;
     }
     else {
-        error = "expected new line after instruction " + instruction[0] + " at line " + std::to_string(line_number) + " found *" + instruction[1] + "* instead";
+        error = "expected new line after instruction " + instruction[0] + " at line " + to_string(line_number) + " found *" + instruction[1] + "* instead";
         return false;
     }
 
@@ -631,11 +631,11 @@ bool parser::parseSubRoutineInstruction(std::vector<std::string> instruction, in
 }
 /*-----------------------------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------------------------*/
-bool parser::parseVariables(std::vector<std::string> instruction, int& line_number, std::string& error) {
-    std::int16_t value;
-    std::string string_data = "";
-    std::vector<std::string> data;
-    std::vector<std::int16_t> values;
+bool parser::parseVariables(vector<string> instruction, int& line_number, string& error) {
+    int16_t value;
+    string string_data = "";
+    vector<string> data;
+    vector<int16_t> values;
 
     for (unsigned int i = 2; i < instruction.size(); i++)
         string_data += instruction[i];
@@ -649,14 +649,14 @@ bool parser::parseVariables(std::vector<std::string> instruction, int& line_numb
             continue;
         }
 
-        error = "syntax error: *" + data[i] + "* is not a word at line " + std::to_string(line_number);
+        error = "syntax error: *" + data[i] + "* is not a word at line " + to_string(line_number);
         return false;
     }
 
     variables_table[instruction[1]] = line_number;
 
     for (unsigned int i = 0; i < values.size(); i++) {
-        output.push_back(std::bitset< 16 >(values[i]).to_string());
+        output.push_back(bitset< 16 >(values[i]).to_string());
         line_number++;
     }
 
@@ -664,7 +664,7 @@ bool parser::parseVariables(std::vector<std::string> instruction, int& line_numb
     return true;
 }
 
-bool parser::parseKeyWords(std::vector<std::string> instruction, int& line_number, std::string& error) {
+bool parser::parseKeyWords(vector<string> instruction, int& line_number, string& error) {
     if (isTwoOpsInstruction(instruction[0]))
         return parseTwoOpsInstruction(instruction, line_number, error);
 
@@ -680,27 +680,27 @@ bool parser::parseKeyWords(std::vector<std::string> instruction, int& line_numbe
     else if (isSubRoutineInstruction(instruction[0]))
         return parseSubRoutineInstruction(instruction, line_number, error);
 
-    error = "invalid instruction *" + instruction[0] + "* at line " + std::to_string(line_number);
+    error = "invalid instruction *" + instruction[0] + "* at line " + to_string(line_number);
     return false;
 }
 /*-----------------------------------------------------------------------------------------*/
 /*-----------------------------------------------------------------------------------------*/
 void parser::firstPass() {
     int line_number = 0;
-    std::string line;
-    std::string error = "";
+    string line;
+    string error = "";
     int two_lines_label = 0;
     if (input_file.is_open()) {
-        while(std::getline(input_file, line)) {
+        while(getline(input_file, line)) {
             line_number++;
             if (line.size() > 255)
-                throw std::logic_error("syntax error: line size exceeded, number of characters must less then or equal to 255");
+                throw logic_error("syntax error: line size exceeded, number of characters must less then or equal to 255");
             if(!readLine(line,line_number, error, two_lines_label))
-                throw std::logic_error("syntax error: " + error + " at line: " + std::to_string(line_number));
+                throw logic_error("syntax error: " + error + " at line: " + to_string(line_number));
         }
     }
     else {
-        throw std::runtime_error("invalid file");
+        throw runtime_error("invalid file");
     }
 
     input_file.clear();
@@ -709,47 +709,47 @@ void parser::firstPass() {
 
 void parser::secondPass() {
     int line_number = 0;
-    std::string line;
-    std::string error = "";
+    string line;
+    string error = "";
     int two_lines_label = 0;
 
     if (input_file.is_open()) {
-        while(std::getline(input_file, line)) {
+        while(getline(input_file, line)) {
             line_number++;
             if(!parseLine(line,line_number, error, two_lines_label))
-                throw std::logic_error("syntax error: " + error + " at line: " + std::to_string(line_number));
+                throw logic_error("syntax error: " + error + " at line: " + to_string(line_number));
         }
     }
     else {
-        throw std::runtime_error("invalid file");
+        throw runtime_error("invalid file");
     }
 
-    for (std::map<std::string, int>::iterator it = fix_variables_table.begin(); it != fix_variables_table.end(); it++) {
-        std::int16_t offset;
+    for (map<string, int>::iterator it = fix_variables_table.begin(); it != fix_variables_table.end(); it++) {
+        int16_t offset;
         int tmp = ((variables_table[it->first] - it->second - 1) * 2) - 2;
 
-        if (isIndex(std::to_string(tmp), offset))
-            output[it->second] = std::bitset< 16 >(offset).to_string();
+        if (isIndex(to_string(tmp), offset))
+            output[it->second] = bitset< 16 >(offset).to_string();
         else
-            throw std::logic_error("semantics error: variable offset value out of range at line " + std::to_string(it->second));
+            throw logic_error("semantics error: variable offset value out of range at line " + to_string(it->second));
     }
 
-    for (std::map<std::string, std::pair<int, bool> >::iterator it = fix_labels_table.begin(); it != fix_labels_table.end(); it++) {
+    for (map<string, pair<int, bool> >::iterator it = fix_labels_table.begin(); it != fix_labels_table.end(); it++) {
         int offset = ((labels_table[it->first] - (it->second).first - 1) * 2) - 2;
-        std::string code;
+        string code;
         if ((it->second).second) {
             code = (output[(it->second).first]).substr(0, 8);
             if (offset >= -128 && offset <= 127)
-                output[(it->second).first] = code + std::bitset< 8 >(offset).to_string();
+                output[(it->second).first] = code + bitset< 8 >(offset).to_string();
             else
-                throw std::logic_error("semantics error: variable offset value out of range at line " + std::to_string((it->second).first));
+                throw logic_error("semantics error: variable offset value out of range at line " + to_string((it->second).first));
         }
         else {
             code = (output[(it->second).first]).substr(0, 5);
             if (offset >= -1024 && offset <= 1023)
-                output[(it->second).first] = code + std::bitset< 11 >(offset).to_string();
+                output[(it->second).first] = code + bitset< 11 >(offset).to_string();
             else
-                throw std::logic_error("semantics error: variable offset value out of range at line " + std::to_string((it->second).first));
+                throw logic_error("semantics error: variable offset value out of range at line " + to_string((it->second).first));
         }
     }
 }

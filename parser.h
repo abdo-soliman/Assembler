@@ -13,10 +13,23 @@
 
 #include "util.h"
 
+using std::map;
+using std::pair;
+using std::vector;
+using std::string;
+using std::int16_t;
+using std::ifstream;
+using std::ofstream;
+using std::to_string;
+using std::logic_error;
+using std::runtime_error;
+using std::bitset;
+using std::getline;
+
 class parser {
     private:
         bool inVariablesArea;
-        const std::map<std::string, std::string> instrucitons_two_operand = {
+        const map<string, string> instrucitons_two_operand = {
             {"mov", "1111"},
             {"add", "1110"},
             {"adc", "1101"},
@@ -27,7 +40,7 @@ class parser {
             {"xnor", "1000"},
             {"cmp", "0111"}
         };
-        const std::map<std::string, std::string> instrucitons_one_operand = {
+        const map<string, string> instrucitons_one_operand = {
             {"inc", "0110000000"},
             {"dec", "0110000100"},
             {"clr", "0110001000"},
@@ -40,7 +53,7 @@ class parser {
             {"rol", "0110100100"},
             {"rlc", "0110101000"}
         };
-        const std::map<std::string, std::string> instrucitons_branch = {
+        const map<string, string> instrucitons_branch = {
             {"br",  "0101000"},
             {"beq", "0101001"},
             {"bne", "0101010"},
@@ -49,61 +62,61 @@ class parser {
             {"bhi", "0101101"},
             {"bhs", "0101110"}
         };
-        const std::map<std::string, std::string> instrucitons_no_operand = {
+        const map<string, string> instrucitons_no_operand = {
             {"hlt", "0001000000000000"},
             {"nop", "0000000001000000"}
         };
-        const std::map<std::string, std::string> instructions_sub_routine = {
+        const map<string, string> instructions_sub_routine = {
             {"jsr", "0100"},
             {"rts", "0011000000000000"},
             {"iret", "0010000000000000"}
         };
 
-        std::ifstream input_file;
-        std::map<std::string,int> labels_table;
-        std::string tmp_label;
-        std::map<std::string,int> variables_table;
-        std::map< std::string,std::pair<int, bool> > fix_labels_table;
-        std::map<std::string,int> fix_variables_table;
-        std::vector<std::string> output;
+        ifstream input_file;
+        map<string,int> labels_table;
+        string tmp_label;
+        map<string,int> variables_table;
+        map< string,pair<int, bool> > fix_labels_table;
+        map<string,int> fix_variables_table;
+        vector<string> output;
 
-        bool isValidVariable(std::string variabale, std::string& error);
+        bool isValidVariable(string variabale, string& error);
 
-        bool isKeyWord(std::string variabale);
-        bool isVariable(std::string operand);
-        bool isLabel(std::string operand);
-        int isRegister(std::string operand);
-        bool isIndex(std::string str, std::int16_t& index);
+        bool isKeyWord(string variabale);
+        bool isVariable(string operand);
+        bool isLabel(string operand);
+        int isRegister(string operand);
+        bool isIndex(string str, int16_t& index);
 
-        bool isTwoOpsInstruction(std::string instruction);
-        bool isOneOpInstruction(std::string instruction);
-        bool isBranchInstruction(std::string instruction);
-        bool isNoOpInstruction(std::string instruction);
-        bool isSubRoutineInstruction(std::string instruction);
+        bool isTwoOpsInstruction(string instruction);
+        bool isOneOpInstruction(string instruction);
+        bool isBranchInstruction(string instruction);
+        bool isNoOpInstruction(string instruction);
+        bool isSubRoutineInstruction(string instruction);
 
-        std::string regCode(int reg);
-        bool line2fields(const std::string& s, std::vector<std::string>& tokens, char delimiter, int& two_lines_label);
-        bool readLine(std::string line, int& line_number, std::string& error, int& two_lines_label);
-        bool parseLine(std::string line, int& line_number, std::string& error, int& two_lines_label);
+        string regCode(int reg);
+        bool line2fields(const string& s, vector<string>& tokens, char delimiter, int& two_lines_label);
+        bool readLine(string line, int& line_number, string& error, int& two_lines_label);
+        bool parseLine(string line, int& line_number, string& error, int& two_lines_label);
 
-        bool parseOperandAuto(std::string operand, std::string& mode, std::string& reg_code, int line_number, std::string& error, bool indirect=false);
-        bool parseOperandIndexed(std::string operand, std::string& mode, std::string& reg_code, std::int16_t& index, std::string& variable, int line_number, std::string& error, bool indirect=false);
-        bool parseOperand(std::string operand, std::string& code, std::int16_t& index, std::string& variable, int line_number, std::string& error, bool source=false, bool indirect=false);
-        bool parseTwoOpsInstruction(std::vector<std::string> instruction, int& line_number, std::string& error);
-        bool parseOneOpInstruction(std::vector<std::string> instruction, int& line_number, std::string& error);
-        bool parseBranchInstruction(std::vector<std::string> instruction, int line_number, std::string& error);
-        bool parseNoOpInstruction(std::vector<std::string> instruction, int line_number, std::string& error);
-        bool parseSubRoutineInstruction(std::vector<std::string> instruction, int line_number, std::string& error);
+        bool parseOperandAuto(string operand, string& mode, string& reg_code, int line_number, string& error, bool indirect=false);
+        bool parseOperandIndexed(string operand, string& mode, string& reg_code, int16_t& index, string& variable, int line_number, string& error, bool indirect=false);
+        bool parseOperand(string operand, string& code, int16_t& index, string& variable, int line_number, string& error, bool source=false, bool indirect=false);
+        bool parseTwoOpsInstruction(vector<string> instruction, int& line_number, string& error);
+        bool parseOneOpInstruction(vector<string> instruction, int& line_number, string& error);
+        bool parseBranchInstruction(vector<string> instruction, int line_number, string& error);
+        bool parseNoOpInstruction(vector<string> instruction, int line_number, string& error);
+        bool parseSubRoutineInstruction(vector<string> instruction, int line_number, string& error);
 
-        bool parseVariables(std::vector<std::string> instruction, int& line_number, std::string& error);
-        bool parseKeyWords(std::vector<std::string> instruction, int& line_number, std::string& error);
+        bool parseVariables(vector<string> instruction, int& line_number, string& error);
+        bool parseKeyWords(vector<string> instruction, int& line_number, string& error);
 
         void firstPass();
         void secondPass();
 
     public:
         parser();
-        void parse(std::string input_filename, std::string output_filename="output.bin");
+        void parse(string input_filename, string output_filename="output.bin");
 
 };
 
