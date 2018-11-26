@@ -64,7 +64,7 @@ class parser {
         };
         const map<string, string> instrucitons_no_operand = {
             {"hlt", "0001000000000000"},
-            {"nop", "0000000001000000"}
+            {"nop", "0000000000000000"}
         };
         const map<string, string> instructions_sub_routine = {
             {"jsr", "0100"},

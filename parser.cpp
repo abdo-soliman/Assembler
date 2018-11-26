@@ -552,20 +552,15 @@ bool parser::parseOneOpInstruction(vector<string> instruction, int& line_number,
 }
 
 bool parser::parseBranchInstruction(vector<string> instruction, int line_number, string& error) {
-    char is_reg = '0';
     pair<int, bool> p;
     string code;
 
     if (instruction.size() == 2) {
         if (isLabel(instruction[1])) {
-            p.first = line_number-1;
+            p.first = line_number - 1;
             p.second = true;
             fix_labels_table.insert({p, instruction[1]});
-            code = "00000000";
-        }
-        else if (isRegister(instruction[1])) {
-            is_reg = '1';
-            code = "00000" + regCode(isRegister(instruction[1]));
+            code = "000000000";
         }
         else {
             error = "expected label name after " + instruction[0] + "at line " + to_string(line_number) + " found *" + instruction[1] + "*instead";
@@ -581,7 +576,7 @@ bool parser::parseBranchInstruction(vector<string> instruction, int line_number,
         return false;
     }
 
-    output.push_back(instrucitons_branch.find(toLower(instruction[0]))->second + is_reg + code);
+    output.push_back(instrucitons_branch.find(toLower(instruction[0]))->second + code);
     return true;
 }
 
@@ -596,21 +591,16 @@ bool parser::parseNoOpInstruction(vector<string> instruction, int line_number, s
 }
 
 bool parser::parseSubRoutineInstruction(vector<string> instruction, int line_number, string& error) {
-    char is_reg = '0';
     string code;
     pair<int, bool> p;
     string key_word = toLower(instruction[0]);
 
     if (key_word == "jsr") {
         if (instruction.size() == 2 && isLabel(instruction[1])) {
-            p.first = line_number-1;
+            p.first = line_number - 1;
             p.second = false;
             fix_labels_table.insert({p, instruction[1]});
-            code = "00000000000";
-        }
-        else if (instruction.size() == 2 && isRegister(instruction[1])) {
-            is_reg = '1';
-            code = "00000000" + regCode(isRegister(instruction[1]));
+            code = "000000000000";
         }
         else if (instruction.size() == 1) {
             error = "expected label name after jsr instruction at line " + to_string(line_number) + " found new line instead";
@@ -630,7 +620,7 @@ bool parser::parseSubRoutineInstruction(vector<string> instruction, int line_num
         return false;
     }
 
-    output.push_back(instructions_sub_routine.find("jsr")->second + is_reg + code);
+    output.push_back(instructions_sub_routine.find("jsr")->second + code);
     return true;
 }
 /*-----------------------------------------------------------------------------------------*/
@@ -739,19 +729,25 @@ void parser::secondPass() {
     }
 
     for (map<pair<int, bool>, string>::iterator it = fix_labels_table.begin(); it != fix_labels_table.end(); it++) {
-        int offset = ((labels_table[it->second] - (it->first).first - 1) * 2) - 2;
+        int offset;
+        if (labels_table[it->second] < (it->first).first)
+            offset = labels_table[it->second] - (it->first).first - 2;
+        else
+            offset = labels_table[it->second] - (it->first).first - 1;
+
         string code;
         if ((it->first).second) {
-            code = (output[(it->first).first]).substr(0, 8);
-            if (offset >= -128 && offset <= 127)
-                output[(it->first).first] = code + bitset< 8 >(offset).to_string();
+            code = (output[(it->first).first]).substr(0, 7);
+            if (offset >= -256 && offset <= 255)
+                output[(it->first).first] = code + bitset< 9 >(offset).to_string();
             else
                 throw logic_error("semantics error: variable offset value out of range at line " + to_string((it->first).first));
         }
         else {
-            code = (output[(it->first).first]).substr(0, 5);
-            if (offset >= -1024 && offset <= 1023)
-                output[(it->first).first] = code + bitset< 11 >(offset).to_string();
+            offset = (labels_table[it->second]-1) * 2;
+            code = (output[(it->first).first]).substr(0, 4);
+            if (offset >= 0 && offset <= 4094)
+                output[(it->first).first] = code + bitset< 12 >(offset).to_string();
             else
                 throw logic_error("semantics error: variable offset value out of range at line " + to_string((it->first).first));
         }
