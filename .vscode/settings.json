@@ -36,5 +36,6 @@
         "optional": "cpp",
         "bitset": "cpp"
     },
-    "git.ignoreLimitWarning": true
+    "git.ignoreLimitWarning": true,
+    "python.pythonPath": "/home/abdo/anaconda3/bin/python3"
 }

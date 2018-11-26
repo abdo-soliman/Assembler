@@ -76,8 +76,8 @@ class parser {
         map<string,int> labels_table;
         string tmp_label;
         map<string,int> variables_table;
-        map< string,pair<int, bool> > fix_labels_table;
-        map<string,int> fix_variables_table;
+        map<pair<int, bool>, string> fix_labels_table;
+        map<int, string> fix_variables_table;
         vector<string> output;
 
         bool isValidVariable(string variabale, string& error);

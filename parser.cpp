@@ -265,7 +265,7 @@ bool parser::readLine(string line, int& line_number, string& error, int& two_lin
             return true;
         }
         else {
-            if (splited_line.size() < 3) {
+            if (splited_line.size() < 2) {
                 error = "invalid number of fields in lines starting with label must be a least 3";
                 return false;
             }
@@ -498,7 +498,7 @@ bool parser::parseTwoOpsInstruction(vector<string> instruction, int& line_number
 
     if (code_1.substr(1,2) == "11") {
         if (variable_1 != "")
-            fix_variables_table.insert({variable_1, line_number});
+            fix_variables_table.insert({line_number, variable_1});
 
         output.push_back(bitset< 16 >(index_1).to_string());
         line_number++;
@@ -506,7 +506,7 @@ bool parser::parseTwoOpsInstruction(vector<string> instruction, int& line_number
 
     if (code_2.substr(1,2) == "11") {
         if (variable_2 != "")
-            fix_variables_table.insert({variable_2, line_number});
+            fix_variables_table.insert({line_number, variable_2});
 
         output.push_back(bitset< 16 >(index_2).to_string());
         line_number++;
@@ -522,6 +522,10 @@ bool parser::parseOneOpInstruction(vector<string> instruction, int& line_number,
 
     if (instruction.size() == 2) {
         bool indirect = ((instruction[1])[0] == '@') ? true : false;
+
+        if (indirect)
+            instruction[1] = (instruction[1]).substr(1);
+        
         if (!parseOperand(instruction[1], code, index, variable, line_number, error, false, indirect))
             return false;
     }
@@ -538,7 +542,7 @@ bool parser::parseOneOpInstruction(vector<string> instruction, int& line_number,
 
     if (code.substr(1,2) == "11") {
         if (variable != "")
-            fix_variables_table.insert({variable, line_number});
+            fix_variables_table.insert({line_number, variable});
 
         output.push_back(bitset< 16 >(index).to_string());
         line_number++;
@@ -556,7 +560,7 @@ bool parser::parseBranchInstruction(vector<string> instruction, int line_number,
         if (isLabel(instruction[1])) {
             p.first = line_number-1;
             p.second = true;
-            fix_labels_table.insert({instruction[1], p});
+            fix_labels_table.insert({p, instruction[1]});
             code = "00000000";
         }
         else if (isRegister(instruction[1])) {
@@ -601,7 +605,7 @@ bool parser::parseSubRoutineInstruction(vector<string> instruction, int line_num
         if (instruction.size() == 2 && isLabel(instruction[1])) {
             p.first = line_number-1;
             p.second = false;
-            fix_labels_table.insert({instruction[1], p});
+            fix_labels_table.insert({p, instruction[1]});
             code = "00000000000";
         }
         else if (instruction.size() == 2 && isRegister(instruction[1])) {
@@ -724,32 +728,32 @@ void parser::secondPass() {
         throw runtime_error("invalid file");
     }
 
-    for (map<string, int>::iterator it = fix_variables_table.begin(); it != fix_variables_table.end(); it++) {
+    for (map<int, string>::iterator it = fix_variables_table.begin(); it != fix_variables_table.end(); it++) {
         int16_t offset;
-        int tmp = ((variables_table[it->first] - it->second - 1) * 2) - 2;
+        int tmp = ((variables_table[it->second] - it->first - 1) * 2) - 2;
 
         if (isIndex(to_string(tmp), offset))
-            output[it->second] = bitset< 16 >(offset).to_string();
+            output[it->first] = bitset< 16 >(offset).to_string();
         else
-            throw logic_error("semantics error: variable offset value out of range at line " + to_string(it->second));
+            throw logic_error("semantics error: variable offset value out of range at line " + to_string(it->first));
     }
 
-    for (map<string, pair<int, bool> >::iterator it = fix_labels_table.begin(); it != fix_labels_table.end(); it++) {
-        int offset = ((labels_table[it->first] - (it->second).first - 1) * 2) - 2;
+    for (map<pair<int, bool>, string>::iterator it = fix_labels_table.begin(); it != fix_labels_table.end(); it++) {
+        int offset = ((labels_table[it->second] - (it->first).first - 1) * 2) - 2;
         string code;
-        if ((it->second).second) {
-            code = (output[(it->second).first]).substr(0, 8);
+        if ((it->first).second) {
+            code = (output[(it->first).first]).substr(0, 8);
             if (offset >= -128 && offset <= 127)
-                output[(it->second).first] = code + bitset< 8 >(offset).to_string();
+                output[(it->first).first] = code + bitset< 8 >(offset).to_string();
             else
-                throw logic_error("semantics error: variable offset value out of range at line " + to_string((it->second).first));
+                throw logic_error("semantics error: variable offset value out of range at line " + to_string((it->first).first));
         }
         else {
-            code = (output[(it->second).first]).substr(0, 5);
+            code = (output[(it->first).first]).substr(0, 5);
             if (offset >= -1024 && offset <= 1023)
-                output[(it->second).first] = code + bitset< 11 >(offset).to_string();
+                output[(it->first).first] = code + bitset< 11 >(offset).to_string();
             else
-                throw logic_error("semantics error: variable offset value out of range at line " + to_string((it->second).first));
+                throw logic_error("semantics error: variable offset value out of range at line " + to_string((it->first).first));
         }
     }
 }
