@@ -433,7 +433,7 @@ bool parser::parseOperand(string operand, string& code, int16_t& index, string& 
     }
     else if (isVariable(operand)) {
         variable = operand;
-        reg_code = "111";
+        reg_code = "110";
         mode = (indirect) ? "111" : "011";
     }
     else if (operand[0] == '#' && indirect) {
@@ -441,7 +441,7 @@ bool parser::parseOperand(string operand, string& code, int16_t& index, string& 
         return false;
     }
     else if (operand[0] == '#' && isIndex(operand.substr(1), index) && source) {
-        reg_code = "111";
+        reg_code = "110";
         mode = "100";
     }
     else if (!parseOperandAuto(operand, mode, reg_code, line_number, error, indirect))
@@ -491,7 +491,7 @@ bool parser::parseTwoOpsInstruction(vector<string> instruction, int& line_number
 
     output.push_back(instrucitons_two_operand.find(toLower(instruction[0]))->second + code_1 + code_2);
 
-    if (code_1 == "100111") {
+    if (code_1 == "100110") {
         line_number++;
         output.push_back(bitset< 16 >(index_1).to_string());
     }
@@ -697,6 +697,7 @@ void parser::firstPass() {
         throw runtime_error("invalid file");
     }
 
+    inVariablesArea = false;
     input_file.clear();
     input_file.seekg(0, std::ios::beg);
 }
@@ -729,11 +730,7 @@ void parser::secondPass() {
     }
 
     for (map<pair<int, bool>, string>::iterator it = fix_labels_table.begin(); it != fix_labels_table.end(); it++) {
-        int offset;
-        if (labels_table[it->second] < (it->first).first)
-            offset = labels_table[it->second] - (it->first).first - 2;
-        else
-            offset = labels_table[it->second] - (it->first).first - 1;
+        int offset = labels_table[it->second] - (it->first).first - 2;
 
         string code;
         if ((it->first).second) {
